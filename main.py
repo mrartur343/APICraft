@@ -471,7 +471,7 @@ def get_map2() -> typing.Dict[str, str | int]:
 	return block_map
 
 
-class PlayerItem(BaseModel):
+class PlayerSchema(BaseModel):
 	Health: float
 	Hungry: float
 	Inventory: typing.Dict[str, int]
@@ -479,7 +479,7 @@ class PlayerItem(BaseModel):
 	Y: int
 
 @app.get("/get_all_players")
-def get_players() -> typing.List[PlayerItem]:
+def get_players() -> typing.List[PlayerSchema]:
 	returned = []
 
 	for player in game.players:
@@ -501,7 +501,7 @@ def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = No
 					'Inventory': player_info.inventory}
 
 @app.get("/get_player")
-def get_player(x: int = 0,y:int = 0) -> PlayerItem:
+def get_player(x: int = 0,y:int = 0) -> PlayerSchema:
 	player = game.get_xy_player(x, y)
 	if player is None:
 		return "0"
