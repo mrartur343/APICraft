@@ -10,6 +10,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 import schedule
+from pydantic import BaseModel
 
 
 class Player:
@@ -409,41 +410,41 @@ def hello_world():
 app = FastAPI()
 
 @app.get("/p_move")
-def p_move(direction: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
+def p_move(direction: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None) -> bool:
 	return game.player_move(cf_connecting_ip, int(direction))
 
 
 @app.get("/p_mine")
-def p_mine(direction: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
+def p_mine(direction: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None) -> bool:
 	return game.player_mine(cf_connecting_ip, int(direction))
 
 
 @app.get("/p_build")
-def p_build(direction: int = 0,block_name: str = "", cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
+def p_build(direction: int = 0,block_name: str = "", cf_connecting_ip: typing.Annotated[str | None, Header()] = None) -> bool:
 	print("build")
 	return game.player_build(cf_connecting_ip, int(direction),block_name)
 
 
 @app.get("/p_craft")
-def p_craft(index: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
+def p_craft(index: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None) -> bool:
 	return game.player_craft(cf_connecting_ip, int(index))
 
 
 @app.get("/get_floor")
-def get_floor(x: int = 0,y:int = 0):
+def get_floor(x: int = 0,y:int = 0) -> str:
 	floor = game.map.get_floor(x, y)
 	if floor is None:
 		return "0"
 	return floor.block.block_type
 
 @app.get("/get_block")
-def get_block(x: int = 0,y:int = 0):
+def get_block(x: int = 0,y:int = 0) -> str:
 	block = game.map.get_block(x, y)
 	if block is None:
 		return "0"
 	return block.block.block_type
 @app.get("/get_all_blocks")
-def get_map():
+def get_map() -> typing.Dict[str, str | int]:
 	block_map = {}
 	for i in range(20):
 		for j in range(20):
@@ -456,7 +457,7 @@ def get_map():
 				block_map[f"{x}_{y}"]=block.block.block_type
 	return block_map
 @app.get("/get_all_floor")
-def get_map2():
+def get_map2() -> typing.Dict[str, str | int]:
 	block_map = {}
 	for i in range(20):
 		for j in range(20):
@@ -468,27 +469,36 @@ def get_map2():
 			else:
 				block_map[f"{x}_{y}"]=block.block.block_type
 	return block_map
+
+
+class PlayerItem(BaseModel):
+	Health: float
+	Hungry: float
+	Inventory: typing.Dict[str, int]
+	X: int
+	Y: int
+
 @app.get("/get_all_players")
-def get_players():
-	retured = []
+def get_players() -> typing.List[PlayerItem]:
+	returned = []
 
 	for player in game.players:
-		retured.append({'Health': player.health,
-	                'Hungry': player.hungry,
-	                'Inventory': player.inventory,
-		                "X": player.x,
-		                "Y": player.y})
-	return retured
+		returned.append({'Health': player.health,
+					'Hungry': player.hungry,
+					'Inventory': player.inventory,
+						"X": player.x,
+						"Y": player.y})
+	return returned
 @app.get("/my_player_info")
 def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
 	player_info = game.get_player_info(cf_connecting_ip)
 	if player_info is None:
 		return "0"
 	return {'Health': player_info.health,
-	                'Hungry': player_info.hungry,
-	                'X': player_info.x,
-	                'Y': player_info.y,
-	                'Inventory': player_info.inventory}
+					'Hungry': player_info.hungry,
+					'X': player_info.x,
+					'Y': player_info.y,
+					'Inventory': player_info.inventory}
 
 @app.get("/get_player")
 def get_player(x: int = 0,y:int = 0):
@@ -497,8 +507,8 @@ def get_player(x: int = 0,y:int = 0):
 		return "0"
 	player_info = game.players[player]
 	return {'Health': player_info.health,
-	                'Hungry': player_info.hungry,
-	                'Inventory': player_info.inventory}
+					'Hungry': player_info.hungry,
+					'Inventory': player_info.inventory}
 
 
 @app.get("/craft_list")
