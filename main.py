@@ -490,7 +490,7 @@ def get_players() -> typing.List[PlayerItem]:
 						"Y": player.y})
 	return returned
 @app.get("/my_player_info")
-def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
+def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = None) -> PlayerItem:
 	player_info = game.get_player_info(cf_connecting_ip)
 	if player_info is None:
 		return "0"
@@ -501,7 +501,7 @@ def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = No
 					'Inventory': player_info.inventory}
 
 @app.get("/get_player")
-def get_player(x: int = 0,y:int = 0):
+def get_player(x: int = 0,y:int = 0) -> PlayerItem:
 	player = game.get_xy_player(x, y)
 	if player is None:
 		return "0"
@@ -512,7 +512,7 @@ def get_player(x: int = 0,y:int = 0):
 
 
 @app.get("/craft_list")
-def craft_list():
+def craft_list() -> list:
 	return all_crafts
 
 
