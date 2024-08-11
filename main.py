@@ -9,9 +9,10 @@ from fastapi import FastAPI, Header
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
+from flask import Flask, request, jsonify
 import schedule
 
-
+app = Flask("app")
 class Player:
 	def __init__(self, ip: str, x: int, y: int, health: float, hungry: float, inventory: dict):
 		self.inventory: typing.Dict[str,int] = inventory
@@ -406,43 +407,54 @@ def hello_world():
 	<p>apicraft.devisart.xyz/craft_list - всі крафти у грі"""'''
 
 
-app = FastAPI()
-
-@app.get("/p_move")
-def p_move(direction: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
-	return game.player_move(cf_connecting_ip, int(direction))
-
-
-@app.get("/p_mine")
-def p_mine(direction: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
-	return game.player_mine(cf_connecting_ip, int(direction))
+@app.route("/p_move", methods=["GET"])
+def p_move():
+	ip = request.headers['Cf-Connecting-Ip']
+	direct = request.args.get('direction')
+	return jsonify(game.player_move(ip, int(direct)))
 
 
-@app.get("/p_build")
-def p_build(direction: int = 0,block_name: str = "", cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
+@app.route("/p_mine", methods=["GET"])
+def p_mine():
+	ip = request.headers['Cf-Connecting-Ip']
+	direct = request.args.get('direction')
+	return jsonify(game.player_mine(ip, int(direct)))
+
+
+@app.route("/p_build", methods=["GET"])
+def p_build():
 	print("build")
-	return game.player_build(cf_connecting_ip, int(direction),block_name)
+	ip = request.headers['Cf-Connecting-Ip']
+	direct = request.args.get('direction')
+	block_name = request.args.get('block_name')
+	return jsonify(game.player_build(ip, int(direct),block_name))
 
 
-@app.get("/p_craft")
-def p_craft(index: int = 0, cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
-	return game.player_craft(cf_connecting_ip, int(index))
+@app.route("/p_craft", methods=["GET"])
+def p_craft():
+	ip = request.headers['Cf-Connecting-Ip']
+	index = request.args.get('index')
+	return jsonify(game.player_craft(ip, int(index)))
 
 
-@app.get("/get_floor")
-def get_floor(x: int = 0,y:int = 0):
+@app.route("/get_floor", methods=["GET"])
+def get_floor():
+	x = int(request.args.get('x'))
+	y = int(request.args.get('y'))
 	floor = game.map.get_floor(x, y)
 	if floor is None:
 		return "0"
-	return floor.block.block_type
+	return jsonify(floor.block.block_type)
 
-@app.get("/get_block")
-def get_block(x: int = 0,y:int = 0):
+@app.route("/get_block", methods=["GET"])
+def get_block():
+	x = int(request.args.get('x'))
+	y = int(request.args.get('y'))
 	block = game.map.get_block(x, y)
 	if block is None:
 		return "0"
-	return block.block.block_type
-@app.get("/get_all_blocks")
+	return jsonify(block.block.block_type)
+@app.route("/get_all_blocks", methods=["GET"])
 def get_map():
 	block_map = {}
 	for i in range(20):
@@ -454,8 +466,8 @@ def get_map():
 				block_map[f"{x}_{y}"] = 0
 			else:
 				block_map[f"{x}_{y}"]=block.block.block_type
-	return block_map
-@app.get("/get_all_floor")
+	return jsonify(block_map)
+@app.route("/get_all_floor", methods=["GET"])
 def get_map2():
 	block_map = {}
 	for i in range(20):
@@ -467,8 +479,8 @@ def get_map2():
 				block_map[f"{x}_{y}"] = 0
 			else:
 				block_map[f"{x}_{y}"]=block.block.block_type
-	return block_map
-@app.get("/get_all_players")
+	return jsonify(block_map)
+@app.route("/get_all_players", methods=["GET"])
 def get_players():
 	retured = []
 
@@ -478,32 +490,35 @@ def get_players():
 	                'Inventory': player.inventory,
 		                "X": player.x,
 		                "Y": player.y})
-	return retured
-@app.get("/my_player_info")
-def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = None):
-	player_info = game.get_player_info(cf_connecting_ip)
+	return jsonify(retured)
+@app.route("/my_player_info", methods=["GET"])
+def my_player_info():
+	ip = request.headers['Cf-Connecting-Ip']
+	player_info = game.get_player_info(ip)
 	if player_info is None:
 		return "0"
-	return {'Health': player_info.health,
+	return jsonify({'Health': player_info.health,
 	                'Hungry': player_info.hungry,
 	                'X': player_info.x,
 	                'Y': player_info.y,
-	                'Inventory': player_info.inventory}
+	                'Inventory': player_info.inventory})
 
-@app.get("/get_player")
-def get_player(x: int = 0,y:int = 0):
+@app.route("/get_player", methods=["GET"])
+def get_player():
+	x = int(request.args.get('x'))
+	y = int(request.args.get('y'))
 	player = game.get_xy_player(x, y)
 	if player is None:
 		return "0"
 	player_info = game.players[player]
-	return {'Health': player_info.health,
+	return jsonify({'Health': player_info.health,
 	                'Hungry': player_info.hungry,
-	                'Inventory': player_info.inventory}
+	                'Inventory': player_info.inventory})
 
 
-@app.get("/craft_list")
+@app.route("/craft_list", methods=["GET"])
 def craft_list():
-	return all_crafts
+	return jsonify(all_crafts)
 
 
 def async_task():
@@ -522,10 +537,13 @@ def run_scheduler():
 		time.sleep(5)
 
 
-schedule.every(6).hours.do(async_task)
-scheduler_thread = threading.Thread(target=run_scheduler)
-scheduler_thread.start()
+async def main():
+	schedule.every(6).hours.do(async_task)
+	scheduler_thread = threading.Thread(target=run_scheduler)
+	scheduler_thread.start()
+	app.run()
 
+asyncio.run(main())
 
 
 
