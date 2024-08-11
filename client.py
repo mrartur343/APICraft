@@ -8,44 +8,44 @@ class P:
 		self.y = y
 		self.x = x
 def player_move(direct):
-	r = requests.get(f'http://apicraft.devisart.xyz/p_move?direction={direct}')
+	r = requests.get(f'http://localhost/p_move?direction={direct}')
 	return r.json()
 def player_mine(direct):
-	r = requests.get(f'http://apicraft.devisart.xyz/p_mine?direction={direct}')
+	r = requests.get(f'http://localhost/p_mine?direction={direct}')
 	return r.json()
 
 def player_build(direct,block_name):
-	r = requests.get(f'http://apicraft.devisart.xyz/p_build?direction={direct}&block_name={block_name}')
+	r = requests.get(f'http://localhost/p_build?direction={direct}&block_name={block_name}')
 	return r.json()
 def player_craft(index):
-	r = requests.get(f'http://apicraft.devisart.xyz/p_craft?index={index}')
+	r = requests.get(f'http://localhost/p_craft?index={index}')
 	return r.json()
 def get_player_info():
-	r = requests.get(f'http://apicraft.devisart.xyz/my_player_info')
+	r = requests.get(f'http://localhost/my_player_info')
 	p_info_d = r.json()
 	return P(p_info_d['Health'],p_info_d['Hungry'],p_info_d['X'],p_info_d['Y'],p_info_d['Inventory'])
 def get_xy_player(x,y):
-	r = requests.get(f'http://apicraft.devisart.xyz/get_player?x={x}&y={y}')
+	r = requests.get(f'http://localhost/get_player?x={x}&y={y}')
 	p_info_d = r.json()
 	return p_info_d
 def get_xy_block(x,y):
-	r = requests.get(f'http://apicraft.devisart.xyz/get_block?x={x}&y={y}')
+	r = requests.get(f'http://localhost/get_block?x={x}&y={y}')
 	p_info_d = r.json()
 	return p_info_d
 def get_all_map_blocks():
-	r = requests.get(f'http://apicraft.devisart.xyz/get_all_blocks')
+	r = requests.get(f'http://localhost/get_all_blocks')
 	p_info_d = r.json()
 	return p_info_d
 def get_all_map_floor():
-	r = requests.get(f'http://apicraft.devisart.xyz/get_all_floor')
+	r = requests.get(f'http://localhost/get_all_floor')
 	p_info_d = r.json()
 	return p_info_d
 def get_all_players():
-	r = requests.get(f'http://apicraft.devisart.xyz/get_all_players')
+	r = requests.get(f'http://localhost/get_all_players')
 	p_info_d = r.json()
 	return p_info_d
 def get_xy_floor(x,y):
-	r = requests.get(f'http://apicraft.devisart.xyz/get_floor?x={x}&y={y}')
+	r = requests.get(f'http://localhost/get_floor?x={x}&y={y}')
 	p_info_d = r.json()
 	return p_info_d
 player_move(1)
