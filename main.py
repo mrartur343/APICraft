@@ -490,7 +490,7 @@ def get_players() -> typing.List[PlayerSchema]:
 						"Y": player.y})
 	return returned
 @app.get("/my_player_info")
-def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = None) -> PlayerItem:
+def my_player_info(cf_connecting_ip: typing.Annotated[str | None, Header()] = None) -> PlayerSchema:
 	player_info = game.get_player_info(cf_connecting_ip)
 	if player_info is None:
 		return "0"
