@@ -512,7 +512,7 @@ def get_player(x: int = 0,y:int = 0) -> PlayerItem:
 
 
 @app.get("/craft_list")
-def craft_list() -> list:
+def craft_list() -> typing.List[typing.List[typing.Dict[str, int]]]:
 	return all_crafts
 
 
